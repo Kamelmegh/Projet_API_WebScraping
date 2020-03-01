@@ -2,50 +2,72 @@
 library(jsonlite)
 library(tibble)
 
-#Dans notre API on peux recupérer les données graçe a des Identifiants des régions 
-#Et aussi on peut les récupérer en quelque partie chaque partie contiens au max 20 régions
-#Donc on les a séparer dans des lists de 20
+#*************************************
+data_cities<-function(citie_id){
+  url<-paste("http://api.openweathermap.org/data/2.5/group?id=",citie_id,"&units=metric&APPID=c800fa5b7ad6c01803c180e6b8102329",sep="")
+  data1 <- fromJSON(url)
+  data1 <- data1$list
+  data1 <- as_tibble(data1)
+  
+  return(data1)
+}
 
-liste_1 <- paste('519188','1270260','529334','1269750','473537','569143','464176','1271231','464737','803611','2051302','563692','481725','1257986','1861387','1857578','2207349','4070245','4344544','4215307',sep =',')
-liste_2 <- paste('5285039','4673179','1861060','2130037','1348747','4047656','5493998','3017680','3007202','2058430','2181258','2130135','2110681','1862845','1863250','1852699','1853163','5815135','5391891','7839407',sep =',')
-liste_3 <- paste('2476412','2479183','2482939','2483761','2487620','1252738','1252744','1252773','6240770','2498775','6441676','6438569','6454050','6446231','6452039','6453748','6446218','6457368',sep =',')
-liste_4 <- paste('4056099','3385122','3386567','3387266','3447473','6217081','2508813','2151649','2171000','2154855','2491335','2492345','2498752','360542','361495','362882','1252840','1252925','2426370','2427336',sep =',')
-liste_5 <- paste('2166584','6943577','2065337','3471324','3456005','2425714','2192676','2184443','6232255','7533612','2176264','2181108','2206939','3469034','6217203','6241300','3451220','3455077','3453535','350789',sep =',')
-liste_6 <- paste('356933','356945','356989','358095','358108','2428042','2428228','2429605','2433055','7603258','2424015','1818833','1818209','2429344','1819730','1819414','1818983','1819729','1818501','355795',sep =',')
-liste_7 <- paste('1282028','1337624','1282027','6942153','1819273','1281980','1282256','1337605','1337606','1337607','1337610','1337612')
-
-liste_cities <- c(liste_1,liste_2,liste_3,liste_4,liste_5,liste_6,liste_7)
-
-url1 <- paste("http://api.openweathermap.org/data/2.5/group?id=",liste_1,"&units=metric&APPID=c800fa5b7ad6c01803c180e6b8102329",sep="")
-data1 <- fromJSON(url1)
-data1 <- data1$list
-data1 <- tibble(data1)
-t <- 0
-l1 <- list('coord','sys','main','wind','clouds')
-l2 <- list('country','id','name','lon','lat','temp','feels_like','temp_min','temp_max','pressure','humidity','visibility','speed','all')
-
-new_data <- tibble()
-for (i in l1){
-  if (length(new_data) == 0){
-    new_data <- data1$data1[i][[1]]
-  } 
-  else{
-    new_data <- cbind(new_data,data1$data1[i][[1]])
+#***********************************
+all_information <- function(data_citie){
+  
+  list_field_1 <- list('coord','sys','main','wind','clouds')
+  
+  new_data <- tibble()
+  for (field in list_field_1){
+    if (length(new_data) == 0){
+      new_data <- data_citie[field][[1]]
+    } 
+    else{
+      new_data <- cbind(new_data,data_citie[field][[1]])
+    }
   }
   
+  new_data <- cbind(new_data,data_citie['name'])
+  new_data <- cbind(new_data,data_citie['id'])
+  
+  return(as_tibble(new_data))
 }
 
-new_data <- cbind(new_data,data1$data1['name'])
-new_data <- cbind(new_data,data1$data1['id'])
-new_data <- cbind(new_data,data1$data1['visibility'])
+#***********************************
+data_we_need <- function(all_data_citie){
+  
+  list_field_2 <- list('country','id','name','lon','lat','temp','feels_like','temp_min','temp_max','pressure','humidity','speed','all')
+  
+  final_data <- tibble()
+  for (field in list_field_2){
+    if (length(final_data) == 0){
+      final_data <- all_data_citie[field]
+    } 
+    else{
+      final_data <- cbind(final_data,all_data_citie[field])
+    }
+  }
+  return(final_data)
+}
 
-final_data <- tibble()
-for (l in l2){
-  if (length(final_data) == 0){
-    final_data <- new_data[l]
-  } 
+
+
+cities_id <- read.csv("cites_id.txt")
+liste_cities <- unlist((cities_id[[1]][1:129]))
+
+final_data_cities <- tibble()
+for(city in liste_cities){
+  data_citie <- data_cities(city)
+  all_data_citie <- all_information(data_citie)
+  all_data_we_need <- data_we_need(all_data_citie)
+  
+  if (length(final_data_cities)==0){
+    final_data_cities <- all_data_we_need
+  }
   else{
-    final_data <- cbind(final_data,new_data[l])
+    final_data_cities <- rbind(final_data_cities,all_data_we_need)
   }
 }
-print(final_data)
+print(final_data_cities)
+view(final_data_cities)
+
