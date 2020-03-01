@@ -1,7 +1,10 @@
-#une fct pour entrer a chaqye fois les param
-#iddÃ©e de cache: sauvgarder le resultat et je fais une requette sauf si si j'ai pas la 
+#Importation des librerie jsonlite et tibble
 library(jsonlite)
 library(tibble)
+
+#Dans notre API on peux recupérer les données graçe a des Identifiants des régions 
+#Et aussi on peut les récupérer en quelque partie chaque partie contiens au max 20 régions
+#Donc on les a séparer dans des lists de 20
 
 liste_1 <- paste('519188','1270260','529334','1269750','473537','569143','464176','1271231','464737','803611','2051302','563692','481725','1257986','1861387','1857578','2207349','4070245','4344544','4215307',sep =',')
 liste_2 <- paste('5285039','4673179','1861060','2130037','1348747','4047656','5493998','3017680','3007202','2058430','2181258','2130135','2110681','1862845','1863250','1852699','1853163','5815135','5391891','7839407',sep =',')
@@ -13,47 +16,34 @@ liste_7 <- paste('1282028','1337624','1282027','6942153','1819273','1281980','12
 
 liste_cities <- c(liste_1,liste_2,liste_3,liste_4,liste_5,liste_6,liste_7)
 
-#villes=paste('519188','1270260','529334','1269750','473537','569143','464176','1271231','464737','803611','2051302','563692','481725','1257986','1861387','1857578','2207349','4070245','4344544','4215307',sep =',')
-df <- data.frame()
-
 url1 <- paste("http://api.openweathermap.org/data/2.5/group?id=",liste_1,"&units=metric&APPID=c800fa5b7ad6c01803c180e6b8102329",sep="")
 data1 <- fromJSON(url1)
-print(data1)
-dt1 <- data1$list$weather
-dt2 <- data1$list
-t1 <- as_tibble(dt1)
-view(dt2)
-
-
-
-url2 <- paste("http://api.openweathermap.org/data/2.5/group?id=",liste_2,"&units=metric&APPID=c800fa5b7ad6c01803c180e6b8102329",sep="")
-data2 <- fromJSON(url2)
-dt2 <- data2$list
-t2 <- data.frame(dt2)
-view(t)
-rownames(t2) <- c("21", "22","23","24",  "25",  "26",  "27",  "28",  "29",  "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40")
-row.names(t2)
-print(t2)
-t2 <- as_tibble(dt2)
-
-t <- rbind(t1,t2)
-print(t)
-view(t)
-
-for (i in liste_cities){
-  print(i)
-  
-  url <- paste("http://api.openweathermap.org/data/2.5/group?id=",liste_1,"&units=metric&APPID=c800fa5b7ad6c01803c180e6b8102329",sep="")
-  print(url)
-  
-  data <- fromJSON(url)
-  #t <- as_tibble(data)
-  
-  #df <- rbind(df,as.data.frame(data), unique = FALSE)
-  view(as.data.frame(data))
+data1 <- data1$list
+data1 <- tibble(data1)
+t <- 0
+l1 <- list('coord','sys','main','wind','clouds')
+l2 <- list('country','id','name','lon','lat','temp','feels_like','temp_min','temp_max','pressure','humidity','visibility','speed','all')
+new_data <- tibble()
+for (i in l1){
+  if (length(new_data) == 0){
+    new_data <- data1$data1[i][[1]]
+  } 
+  else{
+    new_data <- cbind(new_data,data1$data1[i][[1]])
+  }
   
 }
+new_data <- cbind(new_data,data1$data1['name'])
+new_data <- cbind(new_data,data1$data1['id'])
+new_data <- cbind(new_data,data1$data1['visibility'])
 
-
-
-
+final_data <- tibble()
+for (l in l2){
+  if (length(final_data) == 0){
+    final_data <- new_data[l]
+  } 
+  else{
+    final_data <- cbind(final_data,new_data[l])
+  }
+}
+print(final_data)
