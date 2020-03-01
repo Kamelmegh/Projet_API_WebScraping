@@ -23,6 +23,7 @@ data1 <- tibble(data1)
 t <- 0
 l1 <- list('coord','sys','main','wind','clouds')
 l2 <- list('country','id','name','lon','lat','temp','feels_like','temp_min','temp_max','pressure','humidity','visibility','speed','all')
+
 new_data <- tibble()
 for (i in l1){
   if (length(new_data) == 0){
@@ -33,6 +34,7 @@ for (i in l1){
   }
   
 }
+
 new_data <- cbind(new_data,data1$data1['name'])
 new_data <- cbind(new_data,data1$data1['id'])
 new_data <- cbind(new_data,data1$data1['visibility'])
