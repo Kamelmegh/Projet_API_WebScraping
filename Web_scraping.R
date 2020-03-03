@@ -2,8 +2,7 @@
 library('rvest')
 
 #Liste de des URL pour récupérer les données et les mettre a jour avec id des villes 
-list_city_to_update <- list(c('https://www.accuweather.com/fr/ru/priiskovyy/1909774/current-weather/1909774','2051302'),
-  c('https://www.accuweather.com/fr/ru/dzhaga/611093/current-weather/611093','563692'),
+list_city_to_update <- list(c('https://www.accuweather.com/fr/ru/dzhaga/611093/current-weather/611093','563692'),
   c('https://accuweather.com/fr/dz/reggane/1942/current-weather/1942','2483761'),
   c('https://accuweather.com/fr/br/viana/38236/current-weather/38236','3385122'),
   c('https://www.accuweather.com/fr/eg/faqus/127341/current-weather/127341','356989'),
@@ -17,7 +16,6 @@ list_city_to_update <- list(c('https://www.accuweather.com/fr/ru/priiskovyy/1909
   c('https://www.accuweather.com/fr/mv/kudahuvadhoo/232554/current-weather/232554','1337607'),
   c('https://www.accuweather.com/fr/mv/thinadhoo/232833/current-weather/232833','1337610'),
   c('https://www.accuweather.com/fr/mv/dhidhdhoo/3925/current-weather/3925','1337612'),
-  c('https://www.accuweather.com/fr/nz/terrace-end/250925/current-weather/250925','2181258'),
   c('https://www.accuweather.com/fr/nz/cambridge/250642/current-weather/250642','6240770'))
 
 
@@ -38,17 +36,28 @@ fun_update <- function(city_to_update){
 }
 
 data_final <- as_tibble(final_data_city)
-
+DF_id_visibility <- data.frame()
+DF_id_visibility_final <- data.frame()
 #Parcours de notre liste a mettre a jour on appelle la fonction fun_update()
 for (city_to_update in list_city_to_update) {
+  
   url <- city_to_update[[1]][1]
   id <- city_to_update[[2]][1]
-  visibilite <- fun_update(url)
   
-  #Mise a jour des informations dans les jeu de données
-  data_final$visibility[data_final$id==id] <- visibilite
+  visibilite <- fun_update(url)
+  DF_id_visibility <- data.frame("id"=id,"visibility"=visibilite)
+  
+  if (length(df1)==0){
+    DF_id_visibility_final <- DF_id_visibility
+  }
+  else{
+    DF_id_visibility_final <- rbind(DF_id_visibility_final,DF_id_visibility)
+  }
+
 }
+#Mise a jour des informations dans les jeu de données avec un merge 
+data_final <- merge(data_final,DF_id_visibility_final,by="id")
 print(data_final)
 view(data_final)
-jsonedit(final_data_city)
+jsonedit(data_final)
 
