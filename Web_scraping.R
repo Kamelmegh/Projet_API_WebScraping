@@ -46,7 +46,7 @@ for (city_to_update in list_city_to_update) {
   visibilite <- fun_update(url)
   
   #Mise a jour des informations dans les jeu de données
-  data_final <- data_final$visibility[data_final$id==id] <- visibilite
+  data_final$visibility[data_final$id==id] <- visibilite
 }
 print(data_final)
 view(data_final)
