@@ -116,7 +116,6 @@ while (y <= nbr_city_id) {
   }
 }
 
-
 #On afftiche le résultat final
 view(final_data_city)
 jsonedit(final_data_city)
